@@ -42,3 +42,5 @@ let square_root_list_of_list lst =
 
 
 let a = square_root_list_of_list(find_sum_of_squares 112);;
+
+List.iter (fun l -> List.iter (fun x -> print_float x; print_string " ") l; print_newline ()) a;;
