@@ -1,3 +1,4 @@
+#load "unix.cma";;
 open Printf;;
 open Unix;;
 let rec reverse_list lst =
@@ -12,11 +13,11 @@ let is_perfect_square n =
 
 (* Fonction pour obtenir les carrés parfaits jusqu'à n inclus *)
 let get_squares n =
-  let rec helper i acc =
+  let rec aux i acc =
     if i*i > n then acc
-    else helper (i+1) (acc @ [i*i])
+    else aux (i+1) (acc @ [i*i])
   in
-  helper 1 [];;
+  aux 1 [];;
 
 (* Fonction pour trouver les combinaisons de carrés parfaits dont la somme est égale à n *)
 let rec find_square_sum n squares =
@@ -27,10 +28,10 @@ let rec find_square_sum n squares =
     if remaining < 0 then []
     else if remaining = 0 then [[x]]
     else let solutions = find_square_sum remaining xs in
-         if solutions <> [] then
-           List.map (fun sol -> x :: sol) solutions @ find_square_sum n xs
-         else
-           find_square_sum n xs;;
+      if solutions <> [] then
+        List.map (fun sol -> x :: sol) solutions @ find_square_sum n xs
+      else
+        find_square_sum n xs;;
 
 let find_sum_of_squares n =
   let squares = get_squares (n * n) in
@@ -62,4 +63,4 @@ let test_find_square_sum n output_file =
   write_csv output_file (List.rev !results);;
 
 (* Appeler la fonction test_find_square_sum avec la valeur de n et le nom du fichier CSV *)
-let () = test_find_square_sum 50 "results1.csv";;
+let () = test_find_square_sum 60 "results1.csv";;
