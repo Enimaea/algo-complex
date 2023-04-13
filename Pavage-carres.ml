@@ -1,15 +1,6 @@
 #load "unix.cma";;
 open Printf;;
 open Unix;;
-let rec reverse_list lst =
-  match lst with
-  | [] -> []
-  | hd :: tl -> reverse_list tl @ [hd];;
-
-(* Fonction pour vérifier si un entier est un carré parfait *)
-let is_perfect_square n =
-  let s = int_of_float (sqrt (float_of_int n)) in
-  s * s = n;;
 
 (* Fonction pour obtenir les carrés parfaits jusqu'à n inclus *)
 let get_squares n =
@@ -33,9 +24,23 @@ let rec find_square_sum n squares =
       else
         find_square_sum n xs;;
 
+(* Fonction pour trouver le nombre de combinaisons de carrés parfaits dont la somme est égale à n *)
+let rec find_num_square_sum n squares =
+  match squares with
+  | [] -> 0
+  | x :: xs ->
+    let remaining = n - x in
+    if remaining < 0 then 0
+    else if remaining = 0 then 1
+    else find_num_square_sum remaining xs + find_num_square_sum n xs;;
+
 let find_sum_of_squares n =
   let squares = get_squares (n * n) in
   find_square_sum (n * n) squares;;
+
+let find_num_sol_squares n =
+  let squares = get_squares (n * n) in
+  find_num_square_sum (n * n) squares;;
 
 let square_root_list_of_list lst =
   List.map (fun sub_lst -> List.map (fun x -> sqrt (float_of_int x)) sub_lst) lst;;
@@ -54,13 +59,12 @@ let test_find_square_sum n output_file =
   let results = ref [] in
   for i = 1 to n do
     let start_time = Unix.gettimeofday () in
-    let solutions = find_sum_of_squares i in
+    let result_count = find_num_sol_squares i in
     let end_time = Unix.gettimeofday () in
     let execution_time = end_time -. start_time in
-    let result_count = List.length solutions in
     results := (i, result_count, execution_time) :: !results;
   done;
   write_csv output_file (List.rev !results);;
 
 (* Appeler la fonction test_find_square_sum avec la valeur de n et le nom du fichier CSV *)
-let () = test_find_square_sum 60 "results1.csv";;
+let () = test_find_square_sum 130 "results3.csv";;
