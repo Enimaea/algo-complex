@@ -1,27 +1,8 @@
+#load "unix.cma";;
+open Printf;;
+open Unix;;  
+  
   type position = {x: int; y: int};;
-
-  let can_place_square board square_size pos =
-    if pos.x + square_size > Array.length board.(0) || pos.y + square_size > Array.length board then
-      false
-    else
-      let rec check_rows y =
-        if y = pos.y + square_size then
-          true
-        else
-          let rec check_columns x =
-            if x = pos.x + square_size then
-              true
-            else if board.(y).(x) = 0 then
-              check_columns (x + 1)
-            else
-              false
-          in
-          if check_columns pos.x then
-            check_rows (y + 1)
-          else
-            false
-      in
-      check_rows pos.y;;
 
   let place_square board square_size pos =
     for y = pos.y to pos.y + square_size - 1 do
@@ -38,37 +19,34 @@
       done
     done;;
   
-  let rec find_next_empty_position board start_pos  =
+    let rec find_next_empty_position board square_size start_pos  =
     let rec find_in_row row col =
-      if col = Array.length board.(0) then
-        find_next_empty_position board {x=0; y=row + 1} 
-      else if board.(row).(col) = 0 then
+      if col + square_size > Array.length board.(0) then
+        find_next_empty_position board square_size {x=0; y=row + 1}
+      else if row + square_size > Array.length board then None
+      else if board.(row).(col) = 0 && board.(row).(col + square_size - 1) = 0 && board.(row + square_size - 1).(col) = 0 && board.(row + square_size - 1).(col + square_size - 1) = 0 then
         Some {x=col; y=row}
       else
-        find_in_row row (col + 1)
+        find_in_row row (col + max 1 board.(row).(col))
     in
-    if start_pos.y = Array.length board then None
-    else find_in_row start_pos.y start_pos.x;;
-  
-  let rec backtrack_paving board bouwkamp_code =
-    match bouwkamp_code with
-    | [] -> Some board
-    | square_size :: remaining_sizes ->
-      let rec try_positions pos_opt =
-        match pos_opt with
-        | None -> None
-        | Some pos ->
-          if can_place_square board square_size pos then (
-            place_square board square_size pos;
-            match backtrack_paving board remaining_sizes with
-            | Some solution_board -> Some solution_board
-            | None ->
-              remove_square board square_size pos;
-              try_positions (find_next_empty_position board {x=pos.x+1; y=pos.y})
-          ) else
-            try_positions (find_next_empty_position board {x=pos.x+1; y=pos.y})
-      in
-      try_positions (find_next_empty_position board {x=0; y=0});;
+    find_in_row start_pos.y start_pos.x;;
+
+    let rec backtrack_paving board bouwkamp_code =
+      match bouwkamp_code with
+      | [] -> Some board
+      | square_size :: remaining_sizes ->
+        let rec try_positions pos_opt =
+          match pos_opt with
+          | None -> None
+          | Some pos ->
+              place_square board square_size pos;
+              match backtrack_paving board remaining_sizes with
+              | Some solution_board -> Some solution_board
+              | None ->
+                remove_square board square_size pos;
+                try_positions (find_next_empty_position board square_size {x=pos.x+1; y=pos.y})
+        in
+        try_positions (find_next_empty_position board square_size {x=0; y=0});;
 
   let is_bouwkamp_code_valid n bouwkamp_code =
     let board = Array.make_matrix n n 0 in
@@ -147,4 +125,14 @@
   let board = Array.make_matrix 112 112 0;;
   let solution_board_opt = backtrack_paving board bouwkamp_code;;
 
-  
+  (* Fonction test_find_square_sum *)
+let test_time_backtrack_paving =
+  let bouwkamp_code = [18;15;14;10;9;8;7;4;1] in
+  let board = Array.make_matrix 32 33 0 in
+  let start_time = Unix.gettimeofday () in
+  let solution_board_opt = backtrack_paving board bouwkamp_code in
+  let end_time = Unix.gettimeofday () in
+  let execution_time = end_time -. start_time in
+  execution_time;;
+
+  let a = min_square_cut 60;;
