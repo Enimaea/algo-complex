@@ -1,0 +1,542 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+\usepackage[french]{babel}
+\usepackage{listings}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{csvsimple}
+\usepackage{pgfplots}
+
+\usepackage{csquotes}
+
+\usepackage{tikz}
+\usetikzlibrary{trees}
+
+
+\pgfplotsset{compat=1.18}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+
+\lstset{style=mystyle}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Projet « Algorithmique et complexité »}
+\author{dahmouni mohamed amine ; majd E-rami}
+
+\begin{document}
+
+
+\begin{titlepage}
+%%Logos
+\includegraphics[height=2cm]{image/logo-ub.png}
+\hfill
+\includegraphics[height=2cm]{image/logo-ufr.png}
+
+%%Université/UFR/IEM
+
+\begin{center}
+{\large{Université de Bourgogne, UFR Sciences et Techniques, Département I.E.M.}\par}
+
+%%Titre
+\vspace{2cm}
+{\huge\bfseries Projet <<\ Algorithmique et complexité\ >>}\par
+{\huge\bfseries Pavage en carrés}\par
+{\bfseries dahmouni mohamed amine ; majd E-rami}\par
+
+\end{center}
+\tableofcontents
+
+\vfill
+{\hfill\large 2022-2023\par}
+
+\end{titlepage}
+
+
+\section{Introduction}
+
+Le pavage d'un domaine avec des carrés de différentes tailles est un problème classique en mathématiques et en informatique. Le but est de trouver une disposition des carrés qui couvre entièrement le domaine sans chevauchement ni espaces vides. Dans ce rapport, nous explorons deux approches principales pour résoudre ce problème : la recherche de solutions mathématiques en utilisant des combinaisons de carrés parfaits et l'algorithme de backtracking pour le pavage avec des codes de Bouwkamp. Ces deux méthodes sont complémentaires, la première permettant de générer des solutions potentielles et la seconde vérifiant leur validité en termes de placement réel en 2D.
+
+\section{Présentation du problème et des données}
+
+Le problème abordé dans ce rapport consiste à paver un carré de taille n x n avec des carrés de différentes tailles, sans chevauchement ni espaces vides. Nous cherchons à trouver des combinaisons de carrés dont la somme des aires est égale à l'aire du carré initial et à vérifier si ces combinaisons peuvent être placées de manière à couvrir entièrement le carré initial en 2D.
+
+Pour représenter un carré et ses pavés, nous utilisons une matrice d'entiers, où chaque élément de la matrice correspond à une cellule du carré initial. La valeur de chaque élément représente la taille du carré qui occupe cette cellule. Par exemple, un élément de valeur 0 indique que la cellule est vide, tandis qu'un élément de valeur 4 indique qu'un carré de taille 4x4 occupe cette cellule et les cellules adjacentes.
+
+Les combinaisons de carrés parfaits sont représentées sous forme de listes d'entiers, où chaque entier correspond à la taille d'un carré. Par exemple, la liste [18; 15; 14; 10; 9; 8; 7; 4; 1] représente une combinaison de carrés de tailles 18x18, 15x15, 14x14, 10x10, 9x9, 8x8, 7x7, 4x4 et 1x1. Les codes de Bouwkamp sont également représentés de cette manière.
+
+Pour les algorithmes et les fonctions auxiliaires, nous utilisons des structures de données telles que des listes, des options et des enregistrements pour stocker et manipuler les informations pertinentes. Par exemple, nous utilisons un enregistrement "position" pour stocker les coordonnées x et y d'une cellule dans la matrice.
+
+Dans la section suivante, nous décrirons en détail les algorithmes de recherche de solutions mathématiques et de backtracking avec des codes de Bouwkamp, ainsi que les structures de données et les fonctions auxiliaires utilisées pour résoudre ce problème.
+
+\section{Explication des algorithmes et fonctions auxiliaires}
+
+Dans cette section, nous décrivons les algorithmes principaux et les fonctions auxiliaires utilisées pour résoudre le problème de pavage. Les algorithmes principaux sont : \textcolor{red}{"find\_square\_sum"} pour trouver les solutions mathématiques et \textcolor{red}{"backtrack\_paving"} pour vérifier la validité des solutions en utilisant le backtracking et les codes de Bouwkamp.
+
+\subsection{Fonction pour obtenir les carrés parfaits jusqu'à n inclus :}
+
+La fonction \textcolor{red}{"get\_squares"} permet d'obtenir tous les carrés parfaits jusqu'à n inclus. Elle prend en entrée un entier n et renvoie une liste de carrés parfaits.
+
+
+
+\begin{lstlisting}[language=Caml]
+let get_squares n =
+  let rec aux i acc =
+    if i*i > n then acc
+    else aux (i+1) (acc @ [i*i])
+  in
+  aux 1 [];;
+\end{lstlisting}
+\newpage
+
+\subsection{Fonction pour trouver les combinaisons de carrés parfaits dont la somme est égale à n:}
+
+La fonction \textcolor{red}{"find\_square\_sum"} est une fonction récursive qui trouve toutes les combinaisons de carrés parfaits dont la somme est égale à un nombre donné n. Cette fonction prend en entrée deux arguments:\textcolor{blue}{"n"}, qui représente le nombre dont on veut trouver la somme des carrés parfaits, et\textcolor{blue}{"squares"}, qui est une liste de carrés parfaits préalablement calculée. Voici le code de la fonction:\newline
+
+\begin{lstlisting}[language=Caml]
+let rec find_square_sum n squares =
+  match squares with
+  | [] -> []
+  | x :: xs ->
+    let remaining = n - x in
+    if remaining < 0 then []
+    else if remaining = 0 then [[x]]
+    else let solutions = find_square_sum remaining xs in
+      if solutions <> [] then
+        List.map (fun sol -> x :: sol) solutions @ find_square_sum n xs
+      else
+        find_square_sum n xs;;
+\end{lstlisting}
+
+La fonction fonctionne en utilisant un algorithme de type "diviser pour régner". Elle commence par vérifier si la liste des carrés parfaits est vide, auquel cas elle renvoie une liste vide, indiquant qu'aucune combinaison n'a été trouvée. Si la liste n'est pas vide, la fonction extrait le premier élément de la liste \textcolor{blue}{"squares"}, représenté par \textcolor{blue}{"x"}, et calcule la différence entre \textcolor{blue}{"n"} et \textcolor{blue}{"x"}, stockée dans la variable remaining.\newline
+
+Ensuite, la fonction vérifie si \textcolor{blue}{"remaining"} est négatif. Si c'est le cas, cela signifie que la combinaison actuelle n'est pas valide, et la fonction renvoie une liste vide. Si \textcolor{blue}{"remaining"} est égal à 0, cela signifie que la combinaison actuelle est valide, et la fonction renvoie une liste contenant \textcolor{blue}{"x"} comme seule solution.\newline
+
+Si \textcolor{blue}{"remaining"} est positif, la fonction effectue un appel récursif à elle-même avec remaining et \textcolor{blue}{"xs"} (la liste des carrés restants) comme arguments. Elle stocke le résultat de cet appel récursif dans la variable \textcolor{blue}{"solutions"}. Si \textcolor{blue}{"solutions"} n'est pas vide, la fonction construit de nouvelles combinaisons en ajoutant \textcolor{blue}{"x"} à chaque solution trouvée, puis concatène ces nouvelles combinaisons avec les solutions trouvées en appelant récursivement la fonction avec \textcolor{blue}{"n"} et \textcolor{blue}{"xs"}. Si \textcolor{blue}{"solutions"} est vide, la fonction continue à chercher d'autres combinaisons en appelant récursivement la fonction avec \textcolor{blue}{"n"} et \textcolor{blue}{"xs"}.\newline
+
+La fonction \textcolor{red}{"find\_square\_sum"} explore ainsi toutes les combinaisons possibles de carrés parfaits et renvoie une liste contenant toutes les combinaisons valides dont la somme est égale à \textcolor{blue}{"n"}.\newline
+
+Il est également possible d'envisager d'utiliser la programmation dynamique pour résoudre le problème de la recherche des combinaisons de carrés parfaits dont la somme est égale à un nombre donné \textcolor{blue}{"n"}.\newline
+
+Cependant, dans notre cas, l'utilisation de la programmation dynamique peut ne pas être la meilleure solution, car elle ne tient pas compte du critère d'unicité des carrés dans chaque combinaison. La programmation dynamique stockerait les solutions intermédiaires pour chaque sous-problème et les réutiliserait pour résoudre les problèmes de taille supérieure, ce qui pourrait conduire à des combinaisons non valides contenant des carrés répétés.\newline
+
+En utilisant l'approche "diviser pour régner" implémentée dans la fonction \textcolor{red}{"find\_square\_sum"}, nous sommes en mesure de garantir l'unicité des carrés dans chaque combinaison, car chaque combinaison est construite en ajoutant un seul carré à la fois, et nous explorons toutes les combinaisons possibles sans répétition.\newline
+
+
+Ainsi, bien que la programmation dynamique puisse être une technique efficace pour résoudre certains problèmes, elle n'est pas nécessairement la meilleure option pour ce cas spécifique, en raison du critère d'unicité des carrés dans les combinaisons valides. L'approche "diviser pour régner" utilisée dans la fonction \textcolor{red}{"find\_square\_sum"} est plus adaptée pour garantir que les combinaisons générées respectent ce critère d'unicité.\newline
+
+
+\subsection{ Fonction pour trouver le nombre de combinaisons de carrés parfaits dont la somme est égale à n :}
+
+La fonction \textcolor{red}{"find\_num\_square\_sum"} prend en entrée un entier n et une liste de carrés parfaits, puis renvoie le nombre de combinaisons de carrés parfaits dont la somme est égale à n. Cette fonction est similaire à \textcolor{red}{"find\_square\_sum"}, mais elle renvoie simplement le nombre de solutions plutôt que les solutions elles-mêmes.\newline
+\begin{lstlisting}[language=Caml]
+let rec find_num_square_sum n squares =
+  match squares with
+  | [] -> 0
+  | x :: xs ->
+    let remaining = n - x in
+    if remaining < 0 then 0
+    else if remaining = 0 then 1
+    else find_num_square_sum remaining xs + find_num_square_sum n xs;;
+\end{lstlisting}
+
+\subsection{ Fonctions pour placer et retirer un carré dans la matrice :}
+Les fonctions \textcolor{red}{"place\_square"} et\textcolor{red}{"remove\_square"} prennent en entrée une matrice représentant le carré initial, la taille d'un carré à placer ou à retirer et la position où le carré doit être placé ou retiré. Elles modifient la matrice en conséquence.\newline
+
+\begin{lstlisting}[language=Caml]
+let place_square board square_size pos =
+    for y = pos.y to pos.y + square_size - 1 do
+      for x = pos.x to pos.x + square_size - 1 do
+        board.(y).(x) <- square_size
+      done
+    done;;
+
+
+  let remove_square board square_size pos =
+    for y = pos.y to pos.y + square_size - 1 do
+      for x = pos.x to pos.x + square_size - 1 do
+        board.(y).(x) <- 0
+      done
+    done;;
+\end{lstlisting}
+\subsection{ Fonction pour trouver la prochaine position vide dans la matrice :}
+
+La fonction \textcolor{red}{"find\_next\_empty\_position"} joue un rôle essentiel dans l'algorithme de pavage avec backtracking. Elle permet de déterminer la prochaine position vide dans la matrice \textcolor{blue}{"board"} où un carré de taille \textcolor{blue}{"square\_size"} peut être placé.\newline
+
+\begin{lstlisting}[language=Caml]
+let rec find_next_empty_position board square_size start_pos  =
+    let rec find_in_row row col =
+      if col + square_size > Array.length board.(0) then
+        find_next_empty_position board square_size {x=0; y=row + 1}
+      else if row + square_size > Array.length board then None
+      else if board.(row).(col) = 0 && board.(row).(col + square_size - 1) = 0 && board.(row + square_size - 1).(col) = 0 && board.(row + square_size - 1).(col + square_size - 1) = 0 then
+        Some {x=col; y=row}
+      else
+        find_in_row row (col + max 1 board.(row).(col))
+    in
+    find_in_row start_pos.y start_pos.x;;
+\end{lstlisting}
+
+La fonction prend en entrée trois arguments :
+\begin{itemize}
+  \item board : la matrice représentant l'état actuel du pavage.
+  \item square\_size : la taille du carré à placer.
+  \item start\_pos : la position à partir de laquelle la recherche de la position vide commence.\newline
+\end{itemize}
+    
+    
+    
+
+La fonction \textcolor{red}{"find\_next\_empty\_position"} fonctionne en utilisant une approche récursive pour parcourir la matrice board. Elle commence par chercher une position vide dans la rangée actuelle à partir de la colonne indiquée par \textcolor{blue}{"start\_pos"}. Si une position valide est trouvée, elle retourne cette position sous la forme d'un enregistrement avec les coordonnées (x, y). Si la position vide n'est pas trouvée dans la rangée actuelle, la fonction passe à la rangée suivante et continue la recherche.\newline
+
+La recherche de la position vide est effectuée en vérifiant si les cellules du coin supérieur gauche, du coin supérieur droit, du coin inférieur gauche et du coin inférieur droit de la zone où le carré de taille \textcolor{blue}{"square\_size"} doit être placé sont vides (c'est-à-dire que leur valeur est égale à 0).\newline
+
+Si la fonction atteint la fin de la matrice sans trouver de position vide, elle retourne None, indiquant qu'aucune position vide n'a été trouvée pour placer le carré.\newline
+
+La fonction \textcolor{red}{"find\_next\_empty\_position"} est utilisée dans la fonction \textcolor{red}{"backtrack\_paving"} pour déterminer où placer le carré de taille \textcolor{blue}{"square\_size"} à chaque étape de l'algorithme de backtracking. Elle aide à explorer toutes les combinaisons possibles de placement de carrés pour vérifier la validité d'une solution.
+
+\subsection{ Fonction de backtracking pour vérifier la validité des solutions :}
+
+La fonction \textcolor{red}{"backtrack\_paving"} est une fonction récursive essentielle à l'algorithme de pavage. Elle permet de vérifier la validité des solutions trouvées par la fonction \textcolor{red}{"find\_square\_sum"} en plaçant les carrés sur le plateau de manière à respecter les contraintes du problème. Cette fonction de backtracking explore toutes les combinaisons possibles de placement des carrés dans la matrice board et s'assure qu'elles correspondent à une solution valide.\newline
+
+\begin{lstlisting}[language=Caml]
+let rec backtrack_paving board bouwkamp_code =
+      match bouwkamp_code with
+      | [] -> Some board
+      | square_size :: remaining_sizes ->
+        let rec try_positions pos_opt =
+          match pos_opt with
+          | None -> None
+          | Some pos ->
+              place_square board square_size pos;
+              match backtrack_paving board remaining_sizes with
+              | Some solution_board -> Some solution_board
+              | None ->
+                remove_square board square_size pos;
+                try_positions (find_next_empty_position board square_size {x=pos.x+1; y=pos.y})
+        in
+        try_positions (find_next_empty_position board square_size {x=0; y=0});;
+\end{lstlisting}
+
+La fonction prend en entrée deux arguments :
+
+La fonction prend en entrée trois arguments :
+\begin{itemize}
+  \item \textcolor{blue}{"board"} : la matrice représentant l'état actuel du pavage.
+  \item \textcolor{blue}{"bouwkamp\_code"} : une liste de carrés parfaits représentant une combinaison trouvée par la fonction \textcolor{red}{"find\_square\_sum"}.\newline
+\end{itemize}
+
+Le processus de backtracking se déroule de la manière suivante :\newline
+
+\begin{enumerate}
+  \item Si la liste \textcolor{blue}{"bouwkamp\_code"} est vide, cela signifie que tous les carrés ont été placés avec succès dans la matrice \textcolor{blue}{"board"}. La fonction retourne alors la matrice \textcolor{blue}{"board"} comme solution valide.
+  \item Si la liste \textcolor{blue}{"bouwkamp\_code"} n'est pas vide, la fonction récupère la taille du premier carré à placer (\textcolor{blue}{"square\_size"}) et essaie de le placer dans la matrice \textcolor{blue}{"board"} en utilisant la fonction \textcolor{red}{"find\_next\_empty\_position"}.
+  \item Si la fonction \textcolor{red}{"find\_next\_empty\_position"} retourne une position valide, la fonction \textcolor{red}{"place\_square"} est appelée pour placer le carré de taille \textcolor{blue}{"square\_size"} à cette position. Ensuite, la fonction \textcolor{red}{"backtrack\_paving"} est appelée récursivement avec la matrice \textcolor{blue}{"board"} mise à jour et la \textcolor{blue}{"bouwkamp\_code"}liste  réduite (sans le carré placé).
+  \item Si la récursion retourne une solution valide, la fonction \textcolor{red}{"backtrack\_paving"} retourne cette solution. Sinon, elle utilise la fonction \textcolor{red}{"remove\_square"} pour retirer le carré de taille \textcolor{blue}{"square\_size"} de la position précédemment trouvée et continue à chercher une nouvelle position pour placer le carré.
+  \item Si la fonction \textcolor{red}{"find\_next\_empty\_position"} ne trouve pas de position valide pour placer le carré, le backtracking se poursuit en revenant à l'étape précédente et en essayant d'autres combinaisons de placement.
+\end{enumerate}
+
+La fonction de backtracking permet de vérifier systématiquement toutes les combinaisons possibles de placement des carrés parfaits pour déterminer si une solution trouvée par la fonction\textcolor{red}{"find\_square\_sum"}  est valide. Grâce à cette approche, l'algorithme peut identifier les solutions qui respectent les contraintes du problème, telles que l'unicité des tailles des carrés et le respect des dimensions de la matrice.\newline
+
+Ps. Veuillez noter que ça marche aussi pour des rectangles, le fonction \textcolor{red}{"backtrack\_paving"} peux prendre n'import quelle matrice en entrais, tant que le \textcolor{blue}{"bouwkamp\_code"} est valide pour cette matrice, il trouvera la solution, il nous reste qu'a générer l'image depuis la matrice résultat.
+
+\section{Complexité et analyse}
+
+Dans cette section, nous allons analyser la complexité temporelle et spatiale des fonctions\newline \textcolor{red}{"find\_square\_sum"} et \textcolor{red}{"backtrack\_paving"}. Nous expliquerons notre raisonnement de manière simple, tout en utilisant des expressions mathématiques pour illustrer nos arguments.
+
+\subsection{ Complexité de find\_square\_sum :}
+\subsubsection{Complexité temporelle}
+La complexité temporelle de la fonction \textcolor{red}{"find\_square\_sum"} dépend du nombre de branches explorées dans l'arbre de recherche. À chaque étape de la fonction, nous avons deux choix : inclure le premier carré de la liste (\textcolor{blue}{"x"}) ou ne pas l'inclure. Cela signifie que, pour chaque élément de la liste des carrés, nous avons deux branches possibles, ce qui entraîne un arbre binaire de recherche.\newline
+
+La profondeur maximale de cet arbre est de n, qui est la taille de la liste des carrés. Par conséquent, le nombre total de nœuds dans l'arbre est de l'ordre de $2^n$, et la complexité temporelle de la fonction est $O(2^n)$.\newline
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[level distance=1.3cm,
+      level 1/.style={sibling distance=6cm},
+      level 2/.style={sibling distance=3cm},
+      level 3/.style={sibling distance=1.5cm}]
+      \node {Root}
+        child { node {null}
+          child { node {null}
+            child { node {null}}
+            child { node {4} }
+          }
+          child { node {2}
+            child { node {null} }
+            child { node {4} }
+          }
+        }
+        child { node {1}
+          child { node {null}
+            child { node {null} }
+            child { node {4} }
+          }
+          child { node {2}
+            child { node {null} }
+            child { node {4} }
+          }
+        };
+        
+    \end{tikzpicture}
+    \caption{arbre de recherche pour n = 3}
+    \label{fig1}
+\end{figure}
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+        taille du coté & temps d'execution (s) \\ \hline
+        1 & 0,000000 \\ \hline
+        10 & 0,000000 \\ \hline
+        20  & 0,000998 \\ \hline
+        30  & 0,004000 \\ \hline
+        40  & 0,091080 \\ \hline
+        50  & 1,216840 \\ \hline
+        60 & 14,505640 \\ \hline
+        70 & 145,550646 \\ \hline
+        80 &  2106,694942 \\ \hline
+    \end{tabular}
+    \caption{table des temps d’execution }
+    \label{tab1}
+\end{table}
+\vspace{55cm}
+
+\begin{figure}[htbp]
+  \centering
+  
+  \begin{tikzpicture}
+    \begin{axis}[      xlabel={taille du coté},      ylabel={temps d’execution (s)},      grid=major, legend entries={temps d’execution},      legend style={at={(0.02,0.98)}},width=10cm, height=10cm  ]
+      \addplot table [col sep=semicolon,x=Number,y=Execution Time (s)] {table/results.csv};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{temps d'exécution en fonction de la taille du carré}
+  \label{fig2}
+\end{figure}
+
+
+
+\subsubsection{Complexité spatiale }
+La complexité spatiale de \textcolor{red}{"find\_square\_sum"} est principalement due à la mémoire utilisée par la récursion et le stockage des solutions intermédiaires et finales. Dans ce cas, la profondeur maximale de la récursion est égale à la taille de la liste \textcolor{blue}{"squares"}squares, qui est \textcolor{green}{"n"}.\newline
+
+À chaque niveau de récursion, nous avons besoin de stocker les informations suivantes :\newline
+
+\begin{itemize}
+  \item La liste \textcolor{blue}{"solutions"} qui contient les solutions partielles trouvées jusqu'à présent.
+  \item La liste \textcolor{blue}{"xs"} qui contient les carrés restants à explorer et sa taille maximale est \textcolor{green}{"n"}.\newline
+\end{itemize}
+
+Pour la liste \textcolor{blue}{"solutions"}, elle est créée à chaque appel récursif et stocke les combinaisons de carrés dont la somme est égale à \textcolor{blue}{"remaining"}. Le pire cas se produit lorsque toutes les combinaisons possibles sont des \textcolor{blue}{"solutions"} valides. Dans ce cas, la taille maximale de solutions serait de l'ordre de $O(2^n)$ (où chaque élément est inclus ou exclu).\newline
+
+Pour la liste \textcolor{blue}{"xs"}, elle est partagée entre les appels récursifs et n'est pas modifiée, donc nous pouvons considérer que la mémoire requise pour cette liste est constante.\newline
+
+En somme, la complexité spatiale de \textcolor{red}{"find\_square\_sum"} est dominée par la mémoire requise pour stocker les solutions intermédiaires et finales à chaque niveau de récursion. Ainsi, la complexité spatiale est de l'ordre de $O(2^n)$.
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+        taille du coté & nombre de resultat  \\ \hline
+        1 & 1 \\ \hline
+        10 & 3 \\ \hline
+        20 & 55  \\ \hline
+        30 & 847  \\ \hline
+        40 & 9398  \\ \hline
+        50 & 91021 \\ \hline
+        60 & 855369  \\ \hline
+        70 & 7596889  \\ \hline
+        80 & 62065278  \\ \hline
+    \end{tabular}
+    \caption{table des nombre de resultat }
+    \label{tab2}
+\end{table}
+\vspace{1cm}
+
+\begin{figure}[htbp]
+  \centering
+  
+  \begin{tikzpicture}
+    \begin{axis}[      xlabel={taille du coté},      ylabel={nombre de resultat},      grid=major, legend entries={nombre de resultat},      legend style={at={(0.02,0.98)}},width=9cm, height=9cm    ]
+      \addplot table [col sep=semicolon,x=Number,y=Results Count] {table/results.csv};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{nombre de resultat en fonction de la taille du carré}
+  \label{fig3}
+\end{figure}
+
+on remarque aussi que le nombre de résultat valid suit une courbe exceptionnel.
+
+
+\subsection{ Complexité de backtrack\_paving:}
+\subsubsection{Complexité temporelle}
+
+La complexité temporelle de \textcolor{red}{"backtrack\_paving"} dépend fortement de l'ordre des carrés dans \textcolor{blue}{"bouwkamp\_code"} Si les carrés sont triés de manière décroissante (du plus grand au plus petit), alors l'algorithme de backtracking est susceptible de trouver une solution plus rapidement, car il explore d'abord les positions pour les plus grands carrés et réduit ainsi l'espace de recherche pour les petits carrés.\newline
+
+Dans le meilleur des cas, si la liste \textcolor{blue}{"bouwkamp\_code"} est triée de manière optimale, la solution pourrait être trouvée dès la première tentative, ce qui signifie que l'algorithme ne devra pas revenir en arrière. Dans ce cas, la complexité temporelle serait proportionnelle à la taille de la liste \textcolor{blue}{"bouwkamp\_code"}, soit $O(k)$, où \textcolor{green}{"k"} est le nombre de carrés dans la liste.\newline
+
+Cependant, dans le pire des cas, surtout si tout les carré sons de taille 1, l'algorithme de backtracking pourrait être amené à explorer toutes les combinaisons possibles de positions pour les carrés. La complexité temporelle serait alors exponentielle en fonction du nombre de carrés dans la liste \textcolor{red}{"bouwkamp\_code"}, soit $O((m*n)^k)$ où \textcolor{green}{"n"} et \textcolor{green}{"m"} sont les dimensions de la grille.\newline
+
+En pratique, la complexité temporelle réelle de \textcolor{red}{"backtrack\_paving"} dépendra de l'ordre des carrés dans \textcolor{blue}{"bouwkamp\_code"}, ainsi que de la disposition de la grille et de la nature des solutions. Dans certains cas, la solution pourrait être trouvée rapidement, tandis que dans d'autres, l'algorithme pourrait prendre beaucoup plus de temps.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={$k$},
+            ylabel={$m*n$},
+            zlabel={$O((m*n)^k)$},
+            domain=0:30,
+            y domain=0:100,
+            view={-60}{30},
+            zmode=log
+        ]
+            \addplot3[surf] {(y^x)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{plot 3D de $z=y^x$ ou $y=m*n$ et $x=k$.}
+    \label{fig4}
+\end{figure}
+
+
+\subsubsection{Complexité spatiale }
+
+La complexité spatiale de \textcolor{red}{"backtrack\_paving"} est principalement due à la mémoire utilisée par la récursion. Dans ce cas, la profondeur maximale de la récursion est égale à la taille de \textcolor{blue}{"bouwkamp\_code"}, qui est \textcolor{green}{"k"}. À chaque niveau de récursion, nous avons besoin de stocker les informations suivantes :\newline
+
+\begin{itemize}
+  \item La matrice \textcolor{blue}{"board"} de taille $n * m$.
+  \item La liste \textcolor{blue}{"remaining\_sizes"} qui est une liste de carrés restants à placer et sa taille maximale est k.
+  \item La structure \textcolor{blue}{"pos"} qui contient deux entiers\newline
+\end{itemize}
+
+Pour la matrice \textcolor{blue}{"board"}, elle est référencée et modifiée en place, donc elle n'est pas dupliquée à chaque appel récursif. Par conséquent, la mémoire requise pour la matrice \textcolor{blue}{"board"} est constante et égale à $n * m$.\newline
+
+Pour la liste \textcolor{blue}{"remaining\_sizes"}, la taille maximale est k. Cependant, puisque cette liste est partagée entre les appels récursifs et n'est pas modifiée, nous pouvons considérer que la mémoire requise pour cette liste est constante.\newline
+
+Enfin, la structure \textcolor{blue}{"pos"} est créée à chaque appel récursif et nécessite un espace de mémoire pour stocker deux entiers. La mémoire requise pour \textcolor{blue}{"pos"} est proportionnelle à la profondeur de la récursion.\newline
+
+En somme, la complexité spatiale de \textcolor{red}{"backtrack\_paving"} est dominée par la mémoire requise pour stocker la matrice \textcolor{blue}{"board"} et la structure \textcolor{blue}{"pos"} à chaque niveau de récursion. Ainsi, la complexité spatiale est de l'ordre de $O(n * m + 2 * k) = O(n * m + k)$.
+
+\section{Implémentation}
+
+Dans cette section, nous discutons des détails pertinents de notre implémentation, tels que les points difficiles et les points compliqués.
+
+\subsection{Difficultés rencontrées }
+\subsubsection{Stack overflow pour find\_square\_sum }
+
+Étant donné que cette fonction utilise la récursion pour générer toutes les combinaisons possibles de carrés parfaits dont la somme est égale à \textcolor{green}{"n"}, elle peut provoquer un débordement de pile lorsque le nombre de solutions est énorme. Une approche pour résoudre ce problème pourrait consister à utiliser l'itération plutôt que la récursion ou à appliquer la récursion terminale, mais meme ca ne resout pas le problem a cause du nombre immense de solution, regarder \nameref{tab2}.\newline
+
+\subsubsection{Inconsistance du temps d'exécution de backtrack\_paving}
+Le temps d'exécution de cette fonction dépend fortement de l'ordre des carrés dans \textcolor{blue}{"bouwkamp\_code"} et de la disposition de la grille. Si les carrés sont ordonnés de manière optimale (par exemple, du plus grand au plus petit, ou du Plus élevé à gauche, plus bas à droite.), l'algorithme peut trouver une solution rapidement. Sinon, il peut prendre beaucoup plus de temps pour explorer toutes les combinaisons possibles.\newline
+
+\subsection{Optimisations et améliorations possibles }
+
+\subsubsection{Enumération exhaustive et sélective de décompositions entières}
+Plutôt que de générer toutes les combinaisons possibles de carrés parfaits, on peut utiliser une approche d'énumération exhaustive et sélective pour générer uniquement les décompositions entières qui correspondent à des solutions valides. Cela peut réduire considérablement le nombre de solutions à explorer et améliorer les performances de l'algorithme.\newline
+
+pour plus de détails Je vous recommande la thèse de monsieur \citet{Gambini1999} sur le sujet\newline
+
+\subsubsection{Utiliser la programmation dynamique pour find\_square\_sum}
+
+ Bien que l'utilisation de la programmation dynamique puisse ne pas être très utile dans notre cas en raison du critère d'unicité des carrés, elle pourrait être appliquée pour améliorer l'efficacité de \textcolor{red}{"find\_square\_sum"} si nécessaire. Cette approche permettrait de stocker les résultats intermédiaires et d'éviter de recalculer les mêmes solutions à plusieurs reprises.\newline
+ 
+\subsubsection{Amélioration de la gestion de la mémoire}
+
+La gestion de la mémoire pourrait être améliorée pour réduire la consommation d'espace, par exemple en utilisant des structures de données plus efficaces ou en libérant la mémoire inutilisée plus rapidement.\newline
+
+voici quelleque proposition :
+
+\begin{itemize}
+  \item Réduire l'allocation de mémoire : Essayez de minimiser les allocations de mémoire en réutilisant les structures de données et en évitant les opérations coûteuses, telles que les concaténations de listes. Utilisez des fonctions de traitement des listes telles que \textcolor{blue}{"List.map"}, \textcolor{blue}{"List.fold\_left"}, et \textcolor{blue}{"List.fold\_right"}, qui sont optimisées pour minimiser les allocations.\newline
+  \item Optimiser la taille des structures de données : Pour les tableaux et les autres structures de données, essayez d'utiliser des types de données plus petits, tels que \textcolor{blue}{"int32"} ou \textcolor{blue}{"int64"} au lieu de \textcolor{blue}{"int"}, pour économiser de la mémoire. Cela peut également réduire la fragmentation de la mémoire.\newline
+  \item Gérer manuellement la mémoire : Dans certaines situations, il peut être nécessaire de gérer manuellement la mémoire en utilisant des fonctions de bas niveau telles que \textcolor{blue}{"Gc.alloc"}, \textcolor{blue}{"Gc.free"} et \textcolor{blue}{"Gc.compact"}. Toutefois, cette approche doit être utilisée avec prudence, car elle peut entraîner des problèmes de sécurité et de stabilité si elle est mal gérée.\newline
+\end{itemize}
+
+En résumé, notre implémentation présente quelques défis, tels que le débordement de pile dans \textcolor{red}{"find\_square\_sum"} et l'inconsistance du temps d'exécution de \textcolor{red}{"backtrack\_paving"}. Cependant, en appliquant des optimisations et des améliorations appropriées, il est possible d'améliorer les performances de l'algorithme et de résoudre ces problèmes. L'utilisation d'un \textcolor{blue}{"bouwkamp\_code"} optimal, l'énumération exhaustive et sélective de décompositions entières, l'amélioration de la gestion de la mémoire et l'application de la programmation dynamique sont autant de stratégies qui pourraient être envisagées pour améliorer l'efficacité de notre implémentation.
+
+
+
+
+
+\section{Résultats }
+
+Dans cette partie du rapport, nous présenterons les résultats visuels obtenus à partir de notre implémentation du problème de pavage de carrés parfaits. Nous montrerons les images des pavages générés par notre algorithme de backtracking pour différentes valeurs de "n".
+
+\begin{figure}[htbp]
+  \centering
+  
+  \includegraphics[width=0.5\textwidth]{image/32-33.png}
+  \caption{carré 33 X 32 avec $bouwkamp\_code = [18;15;14;10;9;8;7;4;1]$}
+  \label{fig5}
+
+\end{figure}
+
+
+\begin{figure}[htbp]
+  \centering
+  
+  \includegraphics[width=0.5\textwidth]{image/175-175.png}
+  \caption{carré 175 X 175 avec $bouwkamp\_code = [55;39;81;16;9;14;4;5;3;1;20;56;18;38;30;51;64;31;29;8;43\newline;2;35;33]$}
+  \label{fig6}
+
+\end{figure}
+
+
+\begin{figure}[htbp]
+  \centering
+  
+  \includegraphics[width=0.5\textwidth]{image/112-112.png}
+  \caption{carré 112 X 112 avec $bouwkamp\_code = [50;35;27;8;19;15;17;11;6;24;29;25;9;1;7;18;16;42;4;37;33]$}
+  \label{fig7}
+
+\end{figure}
+
+
+pour les résultat proposer on teste avec des bouwkamp\_code optimale, mais normalement ça peut prendre des mois pour trouver une solution pour les carré de grand taille, pour plus de précision veuillez vous référencee a \citet{Gambini1999}, \citet{bouwkamp_dissection} ,\citet{bouwkamp_catalogue_simple} ,\citet{bouwkamp_catalogue_perfect}, ou visitez \href{http://www.squaring.net/}{www.squaring.net} .
+
+\section{Conclusion}
+
+Dans cette étude, nous avons exploré le problème du pavage de carrés parfaits dans des rectangles et des carrés. Nous avons présenté et analysé les algorithmes \textcolor{red}{"find\_square\_sum"} et \textcolor{red}{"backtrack\_paving"}, qui nous ont permis de générer des solutions de pavage pour différentes valeurs de n. Nous avons également discuté des complexités temporelle et spatiale de ces algorithmes, ainsi que des défis rencontrés lors de leur implémentation, tels que les problèmes de débordement de pile et l'inconsistance du temps d'exécution.\newline
+
+Nous avons également abordé des pistes pour améliorer la performance de notre implémentation, notamment en utilisant l'énumération exhaustive et sélective de décompositions entières, en optimisant la gestion de la mémoire en OCaml et en recherchant des \textcolor{blue}{"bouwkamp\_codes"} optimaux. Les résultats obtenus ont été présentés sous forme de graphiques et d'images pour illustrer les pavages générés.\newline
+
+Enfin, il est intéressant de noter que le problème du pavage peut également être étendu à d'autres formes géométriques, telles que les triangles. Le pavage de triangles pourrait être une nouvelle direction de recherche passionnante, où des méthodes similaires pourraient être adaptées pour résoudre des problèmes de pavage impliquant des triangles et d'autres polygones. Cette extension pourrait permettre d'élargir notre compréhension des problèmes de pavage et d'explorer de nouvelles approches pour résoudre des problèmes géométriques complexes.\newline
+
+
+
+\bibliographystyle{apalike} % style des références
+\bibliography{ref.bib}
+\end{document}
