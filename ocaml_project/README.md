@@ -40,7 +40,7 @@ let cell_size = 1;; (* Choisissez la taille de la cellule *)
 write_solution_to_ppm_file filename solution_board_opt cell_size;;
 
 
-## il y a deja des demo fait vous aver just a les lancer
+## il y a deja des demo fait, vous aver just a les lancer
 vous pouvez compiler chaque démo individuellement en utilisant la commande **make <demo>**, par exemple *make demo1*. Pour compiler toutes les démos, utilisez simplement **make all**. Pour nettoyer les fichiers générés, utilisez **make clean**. Enfin, pour exécuter toutes les démos après les avoir compilées, utilisez **make run**.
 
 si vous voulez compiler et exécuter demo1.ml, vous pouvez faire ce qui suit:
