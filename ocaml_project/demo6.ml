@@ -1,4 +1,4 @@
-#load "unix.cma";;
+
 open Printf;;
 open Unix;;  
 
@@ -207,3 +207,16 @@ let find_solution_in_batches board bouwkamp_code batch_size =
       close_out oc;
       Printf.printf "Solution written to file: %s\n" filename;;
 
+
+
+let bouwkamp_code = [18;15;14;10;9;8;7;4;1];;
+let board = Array.make_matrix 32 33 0;;
+
+let dlist = find_solution_in_batches board bouwkamp_code 200;;
+
+let filename = "solution3.txt";;
+write_solution_to_file filename dlist;;
+
+let filename = "solution3.ppm";;
+let cell_size = 1;; (* Choisissez la taille de la cellule *)
+write_solution_to_ppm_file filename dlist cell_size;;

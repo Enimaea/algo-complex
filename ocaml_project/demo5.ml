@@ -1,4 +1,4 @@
-#load "unix.cma";;
+
 open Printf;;
 open Unix;;  
 
@@ -207,3 +207,26 @@ let find_solution_in_batches board bouwkamp_code batch_size =
       close_out oc;
       Printf.printf "Solution written to file: %s\n" filename;;
 
+
+
+let test_time_backtrack_paving =
+  let bouwkamp_code = [18;15;14;10;9;8;7;4;1] in
+  let board = Array.make_matrix 32 33 0 in
+  let start_time = Unix.gettimeofday () in
+  let solution_board_opt = find_solution_in_batches board bouwkamp_code 200 in
+  let end_time = Unix.gettimeofday () in
+  let execution_time = end_time -. start_time in
+  (execution_time , solution_board_opt);;
+
+
+  let () =
+  let (execution_time, solution_board_opt) = test_time_backtrack_paving in
+  match solution_board_opt with
+  | None ->
+    Printf.printf "No solution found. Execution time: %f seconds\n" execution_time
+  | Some solution_board ->
+    Printf.printf "Solution found. Execution time: %f seconds\n" execution_time;
+    Array.iter (fun row ->
+      Array.iter (fun x -> Printf.printf "%d " x) row;
+      print_newline ()
+    ) solution_board;;

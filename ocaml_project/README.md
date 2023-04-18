@@ -41,6 +41,11 @@ write_solution_to_ppm_file filename solution_board_opt cell_size;;
 
 
 ## il y a deja des demo fait vous aver just a les lancer
+vous pouvez compiler chaque démo individuellement en utilisant la commande **make <demo>**, par exemple *make demo1*. Pour compiler toutes les démos, utilisez simplement **make all**. Pour nettoyer les fichiers générés, utilisez **make clean**. Enfin, pour exécuter toutes les démos après les avoir compilées, utilisez **make run**.
+
+si vous voulez compiler et exécuter demo1.ml, vous pouvez faire ce qui suit:
+        make demo1
+        ./demo1
 
 ### demo1
 
@@ -49,7 +54,7 @@ retourn tout les solution pour n = 50.
 ### demo2
 
 compt le nombre de resultat et le temp d'execution de n = 1 a n = 5
-et les met dans un fichier csv .
+et les met dans un fichier csv **resultsdemo.csv**.
 
 ### demo3
 
@@ -58,3 +63,11 @@ retourn le temp d'execution et la matrice resultat pour un rectongle 33*32 avec 
 ### demo4
 
 genere deux fichier .txt et .ppm ou se trouve le resultat pour un rectongle 33 X 32 avec code de bouwkamp [18;15;14;10;9;8;7;4;1] et un carré 112 X 112 avec le code de bouwkamp [50;35;27;8;19;15;17;11;6;24;29;25;9;1;7;18;16;42;4;37;33]
+
+### demo5
+
+retourn le temp d'execution et la matrice resultat pour un rectongle 33*32 avec le code de bouwkamp [18;15;14;10;9;8;7;4;1] et en etulisent la version ameliorer.
+
+### demo6
+
+genere deux fichier .txt et .ppm ou se trouve le resultat pour un rectongle 33 X 32 avec code de bouwkamp [18;15;14;10;9;8;7;4;1] et en etulisent la version ameliorer.

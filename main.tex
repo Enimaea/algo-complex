@@ -72,7 +72,7 @@
 {\large{Université de Bourgogne, UFR Sciences et Techniques, Département I.E.M.}\par}
 
 %%Titre
-\vspace{2cm}
+\vspace{1cm}
 {\huge\bfseries Projet <<\ Algorithmique et complexité\ >>}\par
 {\huge\bfseries Pavage en carrés}\par
 {\bfseries dahmouni mohamed amine ; majd E-rami}\par
@@ -273,6 +273,71 @@ La fonction de backtracking permet de vérifier systématiquement toutes les com
 
 Ps. Veuillez noter que ça marche aussi pour des rectangles, le fonction \textcolor{red}{"backtrack\_paving"} peux prendre n'import quelle matrice en entrais, tant que le \textcolor{blue}{"bouwkamp\_code"} est valide pour cette matrice, il trouvera la solution, il nous reste qu'a générer l'image depuis la matrice résultat.
 
+
+\subsection{Fonction de backtracking améliorer :}
+
+Après analyse du code précédent et une étude plus approfondi du sujet, on a eu l'idée d'une tout autre approche au problème, pour plus d'explication regarder la Complexité et analyse  \ref{Complexité3}
+
+\begin{lstlisting}[language=Caml]
+(* Fonction pour trouver la prochaine position vide dans le tableau *)
+let rec find_next_empty_position board square_size start_pos  =
+let rec find_in_row row col =
+      if col = Array.length board.(0) then
+        find_in_row (row+1) (0)
+      else if col + square_size > Array.length board.(0) then None
+      else if row + square_size > Array.length board then None
+      else if is_zone_clear board {x=col; y=row} {x=col + square_size - 1; y=row + square_size - 1} 0 then
+        Some {x=col; y=row}
+      else 
+        find_in_row row (col + max 1 board.(row).(col))
+in
+find_in_row start_pos.y start_pos.x;;
+
+(*fonction de pavage iterer une seul fois*)
+  let single_iteration_paving board bouwkamp_code =
+    let rec try_placing_square square_sizes =
+      match square_sizes with
+      | [] -> Some board
+      | square_size :: remaining_sizes ->
+        let pos_opt = find_next_empty_position board square_size {x=0; y=0} in
+        match pos_opt with
+        | None -> None
+        | Some pos ->
+            place_square board square_size pos;
+            let result = try_placing_square remaining_sizes in
+            (match result with
+            | None -> remove_square board square_size pos; None
+            | _ -> result)
+    in
+    try_placing_square bouwkamp_code;;
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language=Caml]
+
+(*fonction de pavage qui test tout les permutation d'un bouwkamp_code*)
+let rec backtrack_paving_ameliorer board bouwkamp_code_permutations =
+  match bouwkamp_code_permutations with
+  | [] -> None
+  | bouwkamp_code :: remaining_permutations ->
+    let solution_board_opt = single_iteration_paving board bouwkamp_code in
+    match solution_board_opt with
+    | Some solution_board -> Some solution_board
+    | None -> backtrack_paving_ameliorer board remaining_permutations;;
+\end{lstlisting}
+
+
+\begin{enumerate}
+  \item find\_next\_empty\_position : Cette version de la fonction est différent de la précédente, elle retourne que la position la plus haute et la plus à droite disponible seulement s'il y a de la place pour le carré, sinon elle ne retourne rien, ce qui fait arrêter la fonction suivante. \newline
+  \item single\_iteration\_paving : Cette fonction prend une de la permutation du \textcolor{blue}{"bouwkamp\_code"} et test de paver dans l'ordre fourni, si le carre est pavée, on retourne la matrice et on fait arrêter la fonction suivante, sinon on ne retourne rien et ont continu.\newline
+  \item backtrack\_paving\_ameliorer  : Cette fois-ci la fonction principale faite en sort de test toutes les permutations de \textcolor{blue}{"bouwkamp\_code"} fourni  jusqu'à retour d'une solution.\newline
+\end{enumerate}
+
+À première vue, c'est changement en l'air de rendre le traitement plus compliquer, mais en réalité cette implémentation est plus rapide que la précédente, néanmoins elle fait face à des problèmes sur un autre niveau.
+
+
+
+
+
 \section{Complexité et analyse}
 
 Dans cette section, nous allons analyser la complexité temporelle et spatiale des fonctions\newline \textcolor{red}{"find\_square\_sum"} et \textcolor{red}{"backtrack\_paving"}. Nous expliquerons notre raisonnement de manière simple, tout en utilisant des expressions mathématiques pour illustrer nos arguments.
@@ -281,11 +346,11 @@ Dans cette section, nous allons analyser la complexité temporelle et spatiale d
 \subsubsection{Complexité temporelle}
 La complexité temporelle de la fonction \textcolor{red}{"find\_square\_sum"} dépend du nombre de branches explorées dans l'arbre de recherche. À chaque étape de la fonction, nous avons deux choix : inclure le premier carré de la liste (\textcolor{blue}{"x"}) ou ne pas l'inclure. Cela signifie que, pour chaque élément de la liste des carrés, nous avons deux branches possibles, ce qui entraîne un arbre binaire de recherche.\newline
 
-La profondeur maximale de cet arbre est de n, qui est la taille de la liste des carrés. Par conséquent, le nombre total de nœuds dans l'arbre est de l'ordre de $2^n$, et la complexité temporelle de la fonction est $O(2^n)$.\newline
+La profondeur maximale de cet arbre est de n, qui est la taille de la liste des carrés. Par conséquent, le nombre total de nœuds dans l'arbre est de l'ordre de $2^n$, et la complexité temporelle de la fonction est $O(2^n)$.
 
 \begin{figure}[htbp]
     \centering
-    \begin{tikzpicture}[level distance=1.3cm,
+    \begin{tikzpicture}[level distance=1cm,
       level 1/.style={sibling distance=6cm},
       level 2/.style={sibling distance=3cm},
       level 3/.style={sibling distance=1.5cm}]
@@ -316,7 +381,7 @@ La profondeur maximale de cet arbre est de n, qui est la taille de la liste des 
     \label{fig1}
 \end{figure}
 
-\begin{table}[!ht]
+\begin{table}[t]
     \centering
     \begin{tabular}{|c|c|c|}
     \hline
@@ -334,13 +399,12 @@ La profondeur maximale de cet arbre est de n, qui est la taille de la liste des 
     \caption{table des temps d’execution }
     \label{tab1}
 \end{table}
-\vspace{55cm}
 
 \begin{figure}[htbp]
   \centering
   
   \begin{tikzpicture}
-    \begin{axis}[      xlabel={taille du coté},      ylabel={temps d’execution (s)},      grid=major, legend entries={temps d’execution},      legend style={at={(0.02,0.98)}},width=10cm, height=10cm  ]
+    \begin{axis}[      xlabel={taille du coté},      ylabel={temps d’execution (s)},      grid=major, legend entries={temps d’execution},      legend style={at={(0.02,0.98)}},width=10cm, height=7cm  ]
       \addplot table [col sep=semicolon,x=Number,y=Execution Time (s)] {table/results.csv};
     \end{axis}
   \end{tikzpicture}
@@ -384,13 +448,13 @@ En somme, la complexité spatiale de \textcolor{red}{"find\_square\_sum"} est do
     \caption{table des nombre de resultat }
     \label{tab2}
 \end{table}
-\vspace{1cm}
+
 
 \begin{figure}[htbp]
   \centering
   
   \begin{tikzpicture}
-    \begin{axis}[      xlabel={taille du coté},      ylabel={nombre de resultat},      grid=major, legend entries={nombre de resultat},      legend style={at={(0.02,0.98)}},width=9cm, height=9cm    ]
+    \begin{axis}[      xlabel={taille du coté},      ylabel={nombre de resultat},      grid=major, legend entries={nombre de resultat},      legend style={at={(0.02,0.98)}},width=10cm, height=7cm    ]
       \addplot table [col sep=semicolon,x=Number,y=Results Count] {table/results.csv};
     \end{axis}
   \end{tikzpicture}
@@ -400,7 +464,7 @@ En somme, la complexité spatiale de \textcolor{red}{"find\_square\_sum"} est do
 
 on remarque aussi que le nombre de résultat valid suit une courbe exceptionnel.
 
-
+\newpage
 \subsection{ Complexité de backtrack\_paving:}
 \subsubsection{Complexité temporelle}
 
@@ -450,6 +514,56 @@ Enfin, la structure \textcolor{blue}{"pos"} est créée à chaque appel récursi
 
 En somme, la complexité spatiale de \textcolor{red}{"backtrack\_paving"} est dominée par la mémoire requise pour stocker la matrice \textcolor{blue}{"board"} et la structure \textcolor{blue}{"pos"} à chaque niveau de récursion. Ainsi, la complexité spatiale est de l'ordre de $O(n * m + 2 * k) = O(n * m + k)$.
 
+\subsection{ backtrack\_paving\_ameliorer:}
+\label{Complexité3}
+\subsubsection{Complexité temporelle}
+Vu qu'on sait qu'une combinaison optimale existe avec la Complexité $O(k)$, , pour quoi pas tester tous les combinaison d'un \textcolor{blue}{"bouwkamp\_code"}, si on fait le calcule, pour une liste de taille \textcolor{green}{"k"}, on a textcolor{green}{"$k!$"} permutation possible, on sait qu'il y $4$ solution optimale (graphiquement, c'est la même, mais retourner de 90 degré) et chacune de, c'est solution optimale a besoin d'appliquer le backtrack une seule fois, alors pas besoin de tester les autres dispositions, ce qui donne $O(k)$ pour la partie backtrack. Ainsi, se \textcolor{red}{"backtrack\_paving\_ameliorer"} a un complexité temporelle de $O(k*k!)$.\newline
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=0.9]
+        \begin{axis}[xlabel={$k$}, ylabel={k*$k!$}, ymode=log]
+        \addplot[domain=0:30, samples=50] {x*factorial(x)};
+        \end{axis}
+        \end{tikzpicture}
+    \caption{plot de la fonction factoriel.}
+    \label{fig5}
+\end{figure}
+
+En comparent la figure 4 et 5 ont constat bel et bien une amélioration au niveau du temps, ou le temps n'est plus dépendant de la taille du carré, mais dépendant uniquement de la taille de la liste \textcolor{blue}{"bouwkamp\_code"} ,
+
+
+\subsubsection{Complexité spatiale}
+Pour la complexité temporelle, on a constaté une amélioration, mais c'est le contraire pour la Complexité spatiale, là, on doit stocker tous la permutation à essayer donc $O(k*k!)$ , et stocker la matrice de taille m*n, Ainsi, la complexité
+spatiale est de l’ordre de $O(n * m + k*k!) = O(k*k!)$.\newline
+ce qui est une complexité pire,  et qui va nous causer du problème a la suit principalement des problèmes de débordement d'entier et de taille de liste.\newline
+
+le problème de la taille de liste peut être résolu facilement, en ne testent qu'un nombre de permutations qui tien dans la mémoire à la fois :
+
+\begin{lstlisting}[language=Caml]
+(*fonction pour contourner le probleme de memoire*)
+let find_solution_in_batches board bouwkamp_code batch_size =
+  let k = List.length bouwkamp_code in
+  let total_permutations = factorial k in
+  let start_idx = ref 0 in
+  let found_solution = ref None in
+  while !found_solution = None && !start_idx < total_permutations do
+    let end_idx = min (!start_idx + batch_size - 1) (total_permutations - 1) in
+    let perms = perm bouwkamp_code !start_idx end_idx in
+    let res = backtrack_paving_ameliorer board perms in
+    let test_permutations () =
+    if res <> None then (
+      found_solution := res;
+      raise Exit
+    )in
+    (try test_permutations () with Exit -> ());
+
+    start_idx := end_idx + 1;
+  done;
+
+  (!found_solution);;
+\end{lstlisting}
+
 \section{Implémentation}
 
 Dans cette section, nous discutons des détails pertinents de notre implémentation, tels que les points difficiles et les points compliqués.
@@ -462,6 +576,10 @@ Dans cette section, nous discutons des détails pertinents de notre implémentat
 \subsubsection{Inconsistance du temps d'exécution de backtrack\_paving}
 Le temps d'exécution de cette fonction dépend fortement de l'ordre des carrés dans \textcolor{blue}{"bouwkamp\_code"} et de la disposition de la grille. Si les carrés sont ordonnés de manière optimale (par exemple, du plus grand au plus petit, ou du Plus élevé à gauche, plus bas à droite.), l'algorithme peut trouver une solution rapidement. Sinon, il peut prendre beaucoup plus de temps pour explorer toutes les combinaisons possibles.\newline
 
+\subsubsection{débordement d'entier }
+L'un des défis majeurs rencontrés au cours du développement de notre algorithme de pavage a été le problème de débordement d'entier. Lorsque nous avons travaillé avec de grands nombres, en particulier lors du calcul des factorielles et des permutations, nous avons découvert que les entiers 64 bits n'étaient pas suffisants pour représenter les valeurs obtenues. Les entiers dépassaient la capacité maximale de stockage et débordaient, entraînant un retour aux valeurs négatives.\newline
+
+Ce problème de débordement d'entier a entraîné des erreurs de calcul et a rendu difficile la manipulation des grandes quantités de permutations et de combinaisons nécessaires pour résoudre le problème du pavage.\newline
 \subsection{Optimisations et améliorations possibles }
 
 \subsubsection{Enumération exhaustive et sélective de décompositions entières}
@@ -484,6 +602,10 @@ voici quelleque proposition :
   \item Optimiser la taille des structures de données : Pour les tableaux et les autres structures de données, essayez d'utiliser des types de données plus petits, tels que \textcolor{blue}{"int32"} ou \textcolor{blue}{"int64"} au lieu de \textcolor{blue}{"int"}, pour économiser de la mémoire. Cela peut également réduire la fragmentation de la mémoire.\newline
   \item Gérer manuellement la mémoire : Dans certaines situations, il peut être nécessaire de gérer manuellement la mémoire en utilisant des fonctions de bas niveau telles que \textcolor{blue}{"Gc.alloc"}, \textcolor{blue}{"Gc.free"} et \textcolor{blue}{"Gc.compact"}. Toutefois, cette approche doit être utilisée avec prudence, car elle peut entraîner des problèmes de sécurité et de stabilité si elle est mal gérée.\newline
 \end{itemize}
+\subsubsection{l'augmentation de la capacité de calcul}
+nous avons exploré l'utilisation de bibliothèques de mathématiques spécifiques, telles que la bibliothèque Zarith pour OCaml, qui permettent de travailler avec des entiers de taille arbitraire. L'utilisation de cette bibliothèque nous permettra d'éviter les problèmes de débordement d'entier et d'améliorer la précision et la fiabilité de nos algorithmes.\newline
+
+Il est important de noter que la gestion des entiers de taille arbitraire peut entraîner une légère diminution des performances en raison de la complexité accrue de la manipulation de ces nombres. Cependant, dans notre cas, les avantages en termes de précision et de fiabilité l'emportent sur les inconvénients liés à la performance. En reconnaissant et en résolvant ce problème de débordement d'entier, nous pourrons créer un algorithme de pavage plus robuste et fiable pour traiter un large éventail de scénarios.\newline
 
 En résumé, notre implémentation présente quelques défis, tels que le débordement de pile dans \textcolor{red}{"find\_square\_sum"} et l'inconsistance du temps d'exécution de \textcolor{red}{"backtrack\_paving"}. Cependant, en appliquant des optimisations et des améliorations appropriées, il est possible d'améliorer les performances de l'algorithme et de résoudre ces problèmes. L'utilisation d'un \textcolor{blue}{"bouwkamp\_code"} optimal, l'énumération exhaustive et sélective de décompositions entières, l'amélioration de la gestion de la mémoire et l'application de la programmation dynamique sont autant de stratégies qui pourraient être envisagées pour améliorer l'efficacité de notre implémentation.
 
@@ -500,7 +622,7 @@ Dans cette partie du rapport, nous présenterons les résultats visuels obtenus 
   
   \includegraphics[width=0.5\textwidth]{image/32-33.png}
   \caption{carré 33 X 32 avec $bouwkamp\_code = [18;15;14;10;9;8;7;4;1]$}
-  \label{fig5}
+  \label{fig6}
 
 \end{figure}
 
@@ -510,7 +632,7 @@ Dans cette partie du rapport, nous présenterons les résultats visuels obtenus 
   
   \includegraphics[width=0.5\textwidth]{image/175-175.png}
   \caption{carré 175 X 175 avec $bouwkamp\_code = [55;39;81;16;9;14;4;5;3;1;20;56;18;38;30;51;64;31;29;8;43\newline;2;35;33]$}
-  \label{fig6}
+  \label{fig7}
 
 \end{figure}
 
@@ -520,13 +642,13 @@ Dans cette partie du rapport, nous présenterons les résultats visuels obtenus 
   
   \includegraphics[width=0.5\textwidth]{image/112-112.png}
   \caption{carré 112 X 112 avec $bouwkamp\_code = [50;35;27;8;19;15;17;11;6;24;29;25;9;1;7;18;16;42;4;37;33]$}
-  \label{fig7}
+  \label{fig8}
 
 \end{figure}
 
 
 pour les résultat proposer on teste avec des bouwkamp\_code optimale, mais normalement ça peut prendre des mois pour trouver une solution pour les carré de grand taille, pour plus de précision veuillez vous référencee a \citet{Gambini1999}, \citet{bouwkamp_dissection} ,\citet{bouwkamp_catalogue_simple} ,\citet{bouwkamp_catalogue_perfect}, ou visitez \href{http://www.squaring.net/}{www.squaring.net} .
-
+\newpage
 \section{Conclusion}
 
 Dans cette étude, nous avons exploré le problème du pavage de carrés parfaits dans des rectangles et des carrés. Nous avons présenté et analysé les algorithmes \textcolor{red}{"find\_square\_sum"} et \textcolor{red}{"backtrack\_paving"}, qui nous ont permis de générer des solutions de pavage pour différentes valeurs de n. Nous avons également discuté des complexités temporelle et spatiale de ces algorithmes, ainsi que des défis rencontrés lors de leur implémentation, tels que les problèmes de débordement de pile et l'inconsistance du temps d'exécution.\newline

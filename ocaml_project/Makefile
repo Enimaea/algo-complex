@@ -1,25 +1,28 @@
 # Define compiler and compiler flags
+# Define compiler and compiler flags
 OCAMLC = ocamlc
 OCAMLFLAGS = -g -w +a-4-9-42-44-45-48
 
-# Define the name of your OCaml source file Pavage-carres-dynamique.ml
-SOURCE = Pavage-carres-dynamique.ml
-
-# Define the name of the output executable
-TARGET = Pavage-carres-dynamique
+# Define source files and targets
+SOURCES = demo1.ml demo2.ml demo3.ml demo4.ml demo5.ml demo6.ml
+TARGETS = $(SOURCES:.ml=)
 
 # Build rule
-$(TARGET): $(SOURCE)
-	$(OCAMLC) $(OCAMLFLAGS) -o $(TARGET) unix.cma $(SOURCE)
+%: %.ml
+	$(OCAMLC) $(OCAMLFLAGS) -o $@ unix.cma $<
 
+# Build all demos
+all: $(TARGETS)
 
 # Clean rule
 clean:
-	rm -f $(TARGET) *.cmi *.cmo
-
-# Default rule
-all: $(TARGET)
+	rm -f $(TARGETS) *.cmi *.cmo
 
 # Run rule
-run: $(TARGET)
-	./$(TARGET)
+run: all
+	@for target in $(TARGETS); do \
+		echo "Running $$target"; \
+		./$$target; \
+	done
+
+.PHONY: all clean run
